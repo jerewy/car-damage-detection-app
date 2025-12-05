@@ -8,3 +8,9 @@ pandas
 numpy
 opencv-python
 kaggle
+fastapi
+uvicorn
+python-multipart
+jinja2
+groq
+python-dotenv
