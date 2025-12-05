@@ -1,0 +1,29 @@
+{
+    "model_name": "CarDD Car Damage Detector",
+    "version": "1.0.0",
+    "experiment_id": "Exp2_yolo11s_640",
+    "architecture": {
+        "base": "YOLO11s",
+        "parameters": "9.4M",
+        "input_resolution": 640,
+        "format": "PyTorch (.pt)"
+    },
+    "metrics_test_set": {
+        "mAP50-95": 0.5875,
+        "mAP50": 0.732,
+        "precision": 0.7677,
+        "recall": 0.6916,
+        "inference_latency_ms": 4.37
+    },
+    "classes": [
+        "dent",
+        "scratch",
+        "crack",
+        "glass_shatter",
+        "lamp_broken",
+        "tire_flat"
+    ],
+    "deployment_notes": "Optimal trade-off model: 2.3x faster than 1024px variant with equivalent accuracy.",
+    "created_at": "2025-12-04 23:01:56",
+    "author": ""
+}

@@ -1,0 +1,11 @@
+path: C:\dev\final_project_deep_learning\datasets\cardd
+train: train/images
+val: val/images
+test: test/images
+names:
+  0: dent
+  1: scratch
+  2: crack
+  3: glass_shatter
+  4: lamp_broken
+  5: tire_flat
