@@ -32,6 +32,9 @@ env/
 Thumbs.db
 ehthumbs.db
 
+# --- Application Generated Files ---
+/app/static/uploads/
+
 # --- Clarification on Models ---
 # The 'models/' directory and its contents are intentionally NOT ignored
 # to include the final, packaged model in version control.

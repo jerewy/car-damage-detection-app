@@ -1,0 +1,122 @@
+Deploying a FastAPI app on Hugging Face Spaces is a great choice and fully supported\! It's one of the best free options for hosting machine learning demos because it provides a generous free tier (CPU) and an easy way to showcase your project.
+
+You will use the **Docker SDK** method on Hugging Face Spaces. Since Hugging Face natively supports Docker, you can package your FastAPI app into a container, and Spaces will run it perfectly.
+
+Here is the step-by-step guide to get your **CarDD FastAPI App** live on Hugging Face.
+
+### **Step 1: Prepare Your Project Structure**
+
+Ensure your project folder (`C:\dev\final_project_deep_learning`) is clean and ready. Your structure should look like this:
+
+```text
+CarDD-App/
+├── app/
+│   ├── main.py           <-- Your FastAPI code
+│   ├── templates/        <-- Your HTML files
+│   └── static/           <-- CSS/Images
+├── models/
+│   └── cardd_yolo11s_640_final.pt
+├── Dockerfile            <-- WE NEED TO CREATE THIS
+├── requirements.txt      <-- WE NEED TO CREATE THIS
+└── README.md             <-- Optional
+```
+
+-----
+
+### **Step 2: Create `requirements.txt`**
+
+Create a file named `requirements.txt` in your root folder. This tells the server what libraries to install.
+
+```text
+fastapi
+uvicorn
+jinja2
+python-multipart
+opencv-python-headless
+ultralytics
+torch --index-url https://download.pytorch.org/whl/cpu
+numpy
+pillow
+```
+
+*Note: We use `opencv-python-headless` because servers don't have screens/GUIs.*
+
+-----
+
+### **Step 3: Create the `Dockerfile`**
+
+Create a file named `Dockerfile` (no extension) in your root folder. This is the blueprint for your container.
+
+```dockerfile
+# 1. Use an official lightweight Python image
+FROM python:3.10-slim
+
+# 2. Set the working directory inside the container
+WORKDIR /code
+
+# 3. Install system dependencies for OpenCV
+# (Required for cv2 to work on Linux containers)
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+# 4. Copy requirements and install them
+COPY ./requirements.txt /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+
+# 5. Copy your application code
+COPY ./app /code/app
+COPY ./models /code/models
+
+# 6. Create a directory for uploads (and set permissions)
+RUN mkdir -p /code/app/static/uploads && chmod 777 /code/app/static/uploads
+
+# 7. Command to run the application
+# Hugging Face expects the app to run on port 7860 by default
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860"]
+```
+
+-----
+
+### **Step 4: Deploy to Hugging Face Spaces**
+
+1.  **Create a New Space:**
+
+      * Go to [huggingface.co/new-space](https://huggingface.co/new-space).
+      * **Space Name:** `CarDD-Damage-Detection` (or similar).
+      * **License:** MIT (or whatever you prefer).
+      * **SDK:** Select **Docker**. (Do not select Streamlit or Gradio).
+      * **Template:** Select **Blank**.
+      * Click **Create Space**.
+
+2.  **Upload Your Files:**
+    You can upload files directly via the browser interface (easier) or use Git.
+
+      * Click **Files** tab -\> **Add file** -\> **Upload files**.
+      * Drag and drop:
+          * `app/` folder (Drag the whole folder if possible, or recreate structure)
+          * `models/` folder
+          * `Dockerfile`
+          * `requirements.txt`
+      * Click **Commit changes to main**.
+
+3.  **Watch it Build:**
+
+      * Click the **App** tab.
+      * You will see a "Building..." status. This might take 3-5 minutes (installing PyTorch takes time).
+      * Once it says "Running", your app is live\!
+
+### **Troubleshooting "Permission Denied"**
+
+Sometimes Docker containers have issues writing to folders (like your uploads folder).
+
+  * **Fix:** That's why I added `RUN chmod 777 ...` in the Dockerfile. It ensures the app can save the uploaded car images.
+
+### **Why this is better than Streamlit for you:**
+
+  * You are deploying a **custom Backend**.
+  * You are using **Docker**.
+  * This is exactly what a **DevOps / Backend Engineer** does. It is a fantastic talking point for interviews.
+
+**Ready to create that Dockerfile?**

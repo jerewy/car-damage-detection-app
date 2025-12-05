@@ -252,6 +252,14 @@
                 text-align: center;
                 background: white;
             }
+            
+            /* FORCE BACKGROUND COLORS IN PRINT */
+            .progress, .progress-bar, .badge {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+
             /* Add padding to body so footer doesn't cover content */
             body {
                 padding-bottom: 50px;
@@ -559,11 +567,18 @@
                             <tr>
                                 <td><strong>${index + 1}</strong></td>
                                 <td><span class="badge bg-warning text-dark fs-6">${d.class}</span></td>
-                                <td>
-                                    <div class="progress" style="height: 25px;">
-                                        <div class="progress-bar bg-success" style="width: ${confPct}%" aria-valuenow="${confPct}">
-                                            ${confPct}%
+                                <td style="min-width: 180px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="progress" style="flex: 1; height: 12px;">
+                                            <div class="progress-bar ${confPct > 70 ? 'bg-success' : (confPct > 40 ? 'bg-warning' : 'bg-danger')}" 
+                                                 role="progressbar" 
+                                                 style="width: ${confPct}%" 
+                                                 aria-valuenow="${confPct}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                            </div>
                                         </div>
+                                        <span class="badge bg-secondary" style="min-width: 50px;">${confPct}%</span>
                                     </div>
                                 </td>
                                 <td><span class="badge bg-warning text-dark">${d.severity}</span></td>

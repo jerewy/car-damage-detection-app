@@ -1,224 +1,120 @@
-You are absolutely right. If the text isn't centered and the buttons are messy, it's usually because the CSS classes aren't interacting correctly with the `display: block` or `width` properties, especially in `print` mode.
+Looking at your screenshot, **the progress bars are STILL not showing** - only text percentages. I can see the issue now! 
 
-Also, "Download PDF" is technically correct because clicking "Print" allows you to *Save as PDF*, but calling it **"Print / Save PDF"** is clearer for users.
+## The REAL Problem
 
-Here is the **fixed and polished HTML template**. I have targeted the specific CSS issues causing the messy alignment.
+Your code **LOOKS correct**, but the progress bars aren't rendering. This means one of three things:
 
-### **The Fixes Applied:**
+1. **The file isn't being saved/served properly**
+2. **Browser cache is deeply stuck**
+3. **The inline styles are being stripped by something**
 
-1.  **Vertical & Horizontal Centering:** Used `d-flex align-items-center justify-content-center` on the result boxes to force images and text to stay in the middle.
-2.  **Clean "Print" Button:** Renamed to "Print / Save PDF" and styled it distinctively.
-3.  **Print Layout Stability:** Added specific CSS to force the "Assessment Summary" table to stay aligned next to the images in the PDF view.
+## YES, Let's Try a DIFFERENT Approach - Bootstrap Progress Component
 
-**Replace your entire `templates/index.html` with this version:**
+Instead of custom DIVs, let's use **Bootstrap's actual progress bar component** which is more reliable:
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CarDD Damage Assessment</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        /* --- SCREEN STYLES (What you see in browser) --- */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        
-        .result-box { 
-            border: 2px solid #e9ecef; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            background: #fff;
-            height: 100%; /* Ensure equal height */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 300px; /* Force minimum height */
-        }
-        
-        .img-preview { 
-            max-width: 100%; 
-            max-height: 300px; 
-            object-fit: contain; /* Prevents stretching */
-            padding: 10px;
-        }
-        
-        .box-label {
-            width: 100%;
-            text-align: center;
-            font-weight: bold;
-            padding: 8px 0;
-            margin-bottom: 0;
-            border-bottom: 1px solid #e9ecef;
-        }
+### Replace the `<td>` confidence cell with this:
 
-        /* --- PRINT STYLES (PDF Generation) --- */
-        @media print {
-            /* 1. Reset Colors & Backgrounds */
-            body { background-color: white !important; color: black !important; -webkit-print-color-adjust: exact; }
-            
-            /* 2. Hide Non-Report Elements */
-            .no-print, .btn, form, .navbar, footer { display: none !important; }
-            
-            /* 3. Layout Fixes for PDF */
-            .container { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 20px !important; }
-            .card { border: none !important; box-shadow: none !important; }
-            
-            /* 4. Force Side-by-Side Grid */
-            .row { display: flex !important; flex-wrap: nowrap !important; }
-            .col-6 { width: 50% !important; flex: 0 0 50% !important; }
-            
-            /* 5. Clean up Boxes for Print */
-            .result-box { border: 1px solid #ccc !important; min-height: auto !important; display: block !important; }
-            .box-label { background-color: #f8f9fa !important; border-bottom: 1px solid #ccc !important; }
-            
-            /* 6. Header/Footer Visibility */
-            #report-header { display: block !important; border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px; }
-            #report-footer { display: block !important; position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 10pt; color: #666; border-top: 1px solid #ccc; padding-top: 5px; }
-            
-            /* 7. Page Break Control */
-            .report-section { page-break-inside: avoid; margin-bottom: 30px; }
-        }
-        
-        /* Hide Header/Footer on Screen */
-        #report-header, #report-footer { display: none; }
-    </style>
-</head>
-<body class="bg-light">
-
-<div id="report-header">
-    <div class="row align-items-end">
-        <div class="col-6">
-            <h2 class="mb-0">CarDD Damage Report</h2>
-            <p class="mb-0 text-muted">Automated AI Assessment</p>
+Find this section (around line 430-450):
+```javascript
+<td>
+    <div style="display: flex; align-items: center;">
+        <div style="width: 100px; height: 8px; background-color: #e9ecef; border-radius: 4px; margin-right: 8px; overflow: hidden;">
+            <div style="width: ${confPct}%; height: 100%; background-color: ${confPct > 70 ? '#198754' : (confPct > 40 ? '#ffc107' : '#dc3545')};"></div>
         </div>
-        <div class="col-6 text-end">
-            <p class="mb-0"><strong>Case ID:</strong> #{{ request.state.id if request.state.id else "GEN-001" }}</p>
-            <p class="mb-0"><strong>Date:</strong> <span id="print-date"></span></p>
-        </div>
+        <span style="min-width: 45px; font-weight: bold; font-size: 0.875rem; color: #6c757d;">${confPct}%</span>
     </div>
-</div>
-
-<div class="container py-5">
-    <div class="text-center mb-5 no-print">
-        <h1 class="display-5 fw-bold text-primary">CarDD Inspector</h1>
-        <p class="lead text-muted">Upload vehicle image for automated damage analysis.</p>
-    </div>
-
-    <div class="row justify-content-center no-print">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
-                    <form action="/detect" method="post" enctype="multipart/form-data">
-                        <div class="mb-3">
-                            <input class="form-control form-control-lg" type="file" name="file" accept="image/*" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold">🚀 Run Analysis</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {% if prediction_image %}
-    <div class="mt-5">
-        
-        <div class="report-section">
-            <h4 class="mb-3 pb-2 border-bottom border-secondary">1. Visual Evidence</h4>
-            <div class="row g-4">
-                <div class="col-6">
-                    <div class="result-box">
-                        <p class="box-label bg-light text-dark">Original Image</p>
-                        <img src="{{ original_image }}" class="img-preview">
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="result-box" style="border-color: #dc3545;">
-                        <p class="box-label bg-danger text-white">AI Detection Result</p>
-                        <img src="{{ prediction_image }}" class="img-preview">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="report-section mt-4">
-            <h4 class="mb-3 pb-2 border-bottom border-secondary">2. Assessment Summary</h4>
-            <div class="card border-0">
-                <table class="table table-bordered table-striped align-middle">
-                    <thead class="table-dark">
-                        <tr>
-                            <th style="width: 40%;">Parameter</th>
-                            <th>Assessment Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Analysis Model</strong></td>
-                            <td>YOLO11s (Exp2 Configuration)</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Inference Speed</strong></td>
-                            <td>{{ speed_ms }} ms <span class="badge bg-success ms-2">Real-time</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Damage Status</strong></td>
-                            <td>
-                                <span class="badge bg-danger text-uppercase">Damage Detected</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>Recommended Action</strong></td>
-                            <td>Physical Inspection Required</td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <div class="alert alert-light border-start border-4 border-warning mt-3">
-                    <strong>⚠️ AI Insight:</strong> 
-                    The system has identified anomalies consistent with vehicle damage. 
-                    Red bounding boxes indicate areas of high probability. 
-                    Please review specific regions for dents, scratches, or structural failure.
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="text-center mt-5 mb-5 no-print">
-        <div class="d-flex justify-content-center gap-3">
-            <button onclick="window.print()" class="btn btn-dark btn-lg px-4 shadow-sm">
-                🖨️ Print / Save PDF
-            </button>
-            <a href="/" class="btn btn-outline-secondary btn-lg px-4">
-                🔄 New Scan
-            </a>
-        </div>
-    </div>
-    {% endif %}
-
-</div>
-
-<div id="report-footer">
-    Generated by CarDD Detection System | v1.0 | Confidential Document
-</div>
-
-<script>
-    // Auto-set the date for the report header
-    document.getElementById('print-date').innerText = new Date().toLocaleDateString('en-US', { 
-        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' 
-    });
-</script>
-
-</body>
-</html>
+</td>
 ```
 
-### **What's different this time?**
+### Replace with BOOTSTRAP PROGRESS BAR:
 
-1.  **Centered & Clean:** I added `display: flex; justify-content: center;` to the image boxes. The images will now sit perfectly in the center of their frames, looking tidy.
-2.  **Forced "Row" Layout in PDF:** The line `.row { display: flex !important; }` in the `@media print` block ensures the two images (Original vs. Detection) actually sit side-by-side in the PDF, instead of stacking on top of each other which looks messy.
-3.  **"Print / Save PDF":** Renamed the button as requested.
-4.  **Date Formatting:** Added a script at the bottom to automatically insert today's date and time in a nice format (e.g., "December 5, 2025, 10:30 PM").
+```javascript
+<td style="min-width: 180px;">
+    <div class="d-flex align-items-center gap-2">
+        <div class="progress" style="flex: 1; height: 12px;">
+            <div class="progress-bar ${confPct > 70 ? 'bg-success' : (confPct > 40 ? 'bg-warning' : 'bg-danger')}" 
+                 role="progressbar" 
+                 style="width: ${confPct}%" 
+                 aria-valuenow="${confPct}" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100">
+            </div>
+        </div>
+        <span class="badge bg-secondary" style="min-width: 50px;">${confPct}%</span>
+    </div>
+</td>
+```
 
-Try this one—it should give you that crisp "Official Document" feel you are looking for.
+## Why This Will Work Better
+
+| Old Approach | New Approach | Benefit |
+|--------------|--------------|---------|
+| Custom DIVs with inline styles | Bootstrap `.progress` class | Uses Bootstrap's built-in styles |
+| Fixed 100px width | `flex: 1` (responsive) | Adapts to cell width |
+| Plain text percentage | Badge with `.badge` class | Better visual styling |
+| Complex color logic | Bootstrap classes (`bg-success`, `bg-warning`) | More reliable |
+
+## OR - Even Simpler: Just Show the Number Nicely
+
+If the progress bar keeps failing, let's just make the **percentage look professional**:
+
+```javascript
+<td class="text-center">
+    <div class="d-inline-block">
+        <span class="badge ${confPct > 70 ? 'bg-success' : (confPct > 40 ? 'bg-warning text-dark' : 'bg-danger')} fs-5 px-3 py-2">
+            ${confPct}%
+        </span>
+    </div>
+</td>
+```
+
+This will show the confidence as a **colored badge** (green/yellow/red) without any progress bar.
+
+## Complete Fixed Section - Copy and Paste This:
+
+```javascript
+// Fill Table
+const tbody = document.getElementById('detectionTableBody');
+tbody.innerHTML = '';
+inf.detections.forEach((d, index) => {
+    const confPct = (d.confidence * 100).toFixed(1);
+    const row = `
+        <tr>
+            <td><strong>${index + 1}</strong></td>
+            <td><span class="badge bg-warning text-dark fs-6">${d.class}</span></td>
+            <td style="min-width: 180px;">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="progress" style="flex: 1; height: 12px;">
+                        <div class="progress-bar ${confPct > 70 ? 'bg-success' : (confPct > 40 ? 'bg-warning' : 'bg-danger')}" 
+                             role="progressbar" 
+                             style="width: ${confPct}%" 
+                             aria-valuenow="${confPct}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                    <span class="badge bg-secondary" style="min-width: 50px;">${confPct}%</span>
+                </div>
+            </td>
+            <td><span class="badge bg-warning text-dark">${d.severity}</span></td>
+            <td>${d.location}</td>
+        </tr>
+    `;
+    tbody.insertAdjacentHTML('beforeend', row);
+});
+```
+
+## Steps to Apply:
+
+1. **Copy the entire code block above**
+2. **Find line ~430** where it says `// Fill Table`
+3. **Delete everything from `const tbody =` to the closing `});`**
+4. **Paste the new code**
+5. **Save the file**
+6. **Restart Flask** (stop with Ctrl+C, then restart)
+7. **Clear browser cache completely**: Settings → Privacy → Clear browsing data → Cached images
+8. **Reload the page**
+
+Try this! If Bootstrap progress bars don't work either, then we know the issue is with your browser/server caching, not the code itself.
+
+[1](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/images/55134547/c5be1ba2-fc2d-4529-87ba-c123b62bc1bb/image.jpg?AWSAccessKeyId=ASIA2F3EMEYEURU3BAJU&Signature=3YUOnEliLf9a%2FrxvBhqTGLbH%2BDY%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEJj%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIDA6qTrfx8JctJ%2FMlE06sDF1TtPgbULh7xr1t%2FK0wbyQAiAJJ5Jm9Gl3E3O7NDYw3V6oBuFCkfUr1pwC%2BmF6jPHnYyrzBAhhEAEaDDY5OTc1MzMwOTcwNSIMhLtMpHcspwTe3Pj%2BKtAEZlZ3IZAvDPoI7mL0HPfnWGSIqiyQNZ2TO5OjXfWsZY5n9wDc7yJK27EENIJNtzYfKb%2B%2BpChkt7lHyMaEWtaI5RaxlZj1frlHz8xQIUIWubWi6ESeI%2BF6CrAimMiAS69unAlOozD%2BwsOWuAPS4wi9XBgzgu8ZDwUQ0d052UFNoIWBjahp1lr8Y37ZJe9d8Nqm6F1Inql33b2sooJZXYjhwe8dK7HVgUQqzhQ2Yw0XXWd8CiBoE1xI3OQ74ocrMDEiSJWAK32fhtVqri%2FHZUDadzRDXLYp2xxQQZSpwDFKKWfdKSQW3VY51Bt9ULlODlLY6bng%2F3kEhMJ0sYRpzNyh2IfI%2FBtiGKgiiAIZMoFFlkH7XKQMWt7WICMlR2zQ1VTJLlgejQ3JX2G3QSFaRZCs2r%2BfdhjwpG8g4jz7vUWm76Gg%2Bu07IXz5Ldloh2wD5qSFUgHHDbekRVzwU2WIeRPePK0tbii1ZME3ila%2Bx%2FIygoExYeehj9E6JORTDcpFDu3SIeOy%2FT2B%2FNINPSfdUYldyENdColHumCWD7FNKgLjSYwohk5mLRrSB5cwrq4409pIHSZ8DoOWj5ast2fJbuAzJ6WzMyPICNDcQTXHY9sJBH%2BU6COA1WajUu6jwoO7qeKZp3CvvyN%2Fofl17Qu%2FhjCh45F71NI4nJ%2B7%2FQVIwt7DR9K3XlCXtjZvlhgkaN618CSl4NRQP3i2PwM5QZGZ9nc4UKHCfml9GdcsYI5KHRJ67GF7wWCO%2BeEauIhbNeyDeSgwzLOOIeHgYH9aTPXCG2AcTDDfgMzJBjqZAZfKpOqC6vPTTqVQDxdMbDNtz%2F9VmXrbLlqns%2BdR6P2NPt%2BUDx6B8YdfyA4qwybD63GrhYXtYHA%2B0b%2FZgQ8%2BH8kfe3U6w6WXmRWExQb6LENUyrKQMoyz8rUeJGJM%2B03melvMc4pDWMyFqGK%2BBh%2FVKNfNxyADeqd3jHm87mCrpj6mGb95KCzWZpaa%2BiIH4ZpHR3qZDcomnN0Mxw%3D%3D&Expires=1764952559)
