@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Car Damage Assessment Report</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         /* SPACING FIXES */
         body {
@@ -32,16 +33,20 @@
             margin-bottom: 20px; /* Space after titles */
             padding-bottom: 10px;
             border-bottom: 3px solid #007bff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
         /* Header spacing */
         .header {
             text-align: center;
             padding: 40px 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
+            color: #212529;
             border-radius: 12px;
             margin-bottom: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         
         .header h1 {
@@ -172,28 +177,114 @@
         
         /* Print optimization */
         @media print {
+            body { 
+                background: white !important; 
+                color: black !important; 
+                font-size: 12pt;
+            }
+            .container {
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
             .section {
+                box-shadow: none !important;
+                border: 1px solid #ccc !important;
+                margin-bottom: 20px !important;
+                break-inside: avoid; /* Prevent cutting sections in half */
                 page-break-inside: avoid;
+            }
+            .metric-card {
+                box-shadow: none !important;
+                border: 1px solid #eee !important;
+                break-inside: avoid;
+            }
+            .action-buttons, #uploadSection, #loading, .header p small {
+                display: none !important;
+            }
+            .header {
+                box-shadow: none !important;
+                border-bottom: 2px solid #000;
+                padding-bottom: 10px;
                 margin-bottom: 20px;
             }
-            .action-buttons, #uploadSection {
-                display: none;
+            /* Remove Bootstrap colors for print fidelity */
+            .text-primary, .text-success, .text-warning, .text-info {
+                color: black !important;
             }
+            /* Fix links */
+            a { 
+                text-decoration: none !important; 
+                color: black !important; 
+            }
+            /* Ensure images fit and don't break */
+            img {
+                max-width: 100% !important;
+                page-break-inside: avoid;
+            }
+            /* Table readability */
+            .table th {
+                background-color: #f0f0f0 !important;
+                color: black !important;
+            }
+            
+            /* Print specific row/column handling for images */
+            .row {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+            }
+            .col-md-6 {
+                width: 50% !important;
+                flex: 0 0 50% !important;
+            }
+            
+            /* Fixed Print Footer */
+            .print-footer {
+                display: block !important;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 10px;
+                border-top: 1px solid #ccc;
+                font-size: 10px;
+                text-align: center;
+                background: white;
+            }
+            /* Add padding to body so footer doesn't cover content */
+            body {
+                padding-bottom: 50px;
+            }
+        }
+        
+        .print-footer {
+            display: none; /* Hidden on screen */
         }
     </style>
 </head>
 <body>
+    <!-- PRINT FOOTER (Visible only in PDF/Print) -->
+    <div class="print-footer">
+        <div class="d-flex justify-content-between">
+            <span><strong>CONFIDENTIAL INSURANCE DOCUMENT</strong></span>
+            <span>Ref ID: <span id="printFooterId">PENDING</span></span>
+            <span>Page <span class="pageNumber"></span></span>
+        </div>
+        <div>Authorized by AutoAssess-AI Automated Systems. Validity subject to physical verification.</div>
+    </div>
+
     <div class="container">
         <!-- HEADER -->
         <div class="header">
-            <h1>🚗 Car Damage Assessment Report</h1>
+            <h1>Car Damage Assessment Report</h1>
             <p>AI-Powered Visual Inspection & Insurance Reporting</p>
             <p><small>Powered by AutoAssess-AI • YOLO11s • Inference: ~4.5ms</small></p>
         </div>
 
         <!-- UPLOAD FORM -->
         <div id="uploadSection" class="section">
-            <h2 class="section-title">📂 Upload Vehicle Image</h2>
+            <h2 class="section-title"><i class="bi bi-cloud-upload"></i> Upload Vehicle Image</h2>
             <form id="uploadForm">
                 <div class="row mb-3">
                     <div class="col-md-4">
@@ -213,7 +304,7 @@
                     <label for="imageInput" class="form-label">Damage Photo</label>
                     <input class="form-control" type="file" id="imageInput" accept="image/*" required>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Analyze Damage</button>
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Analyze Damage</button>
             </form>
         </div>
         
@@ -221,7 +312,7 @@
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
-            <p class="mt-2 text-muted">Analyzing image and generating report...</p>
+            <p class="mt-2 text-muted">Analyzing image and generating technical report...</p>
         </div>
 
         <div id="results" style="display: none;">
@@ -238,7 +329,7 @@
 
             <!-- VEHICLE INFO -->
             <div class="section">
-                <h2 class="section-title">🚘 Vehicle Information</h2>
+                <h2 class="section-title"><i class="bi bi-car-front"></i> Vehicle Information</h2>
                 <div class="row">
                     <div class="col-md-4">
                         <p><strong>Make:</strong> <span id="resMake">...</span></p>
@@ -254,17 +345,17 @@
 
             <!-- DETECTION IMAGES -->
             <div class="section">
-                <h2 class="section-title">📸 Visual Analysis</h2>
+                <h2 class="section-title"><i class="bi bi-camera"></i> Visual Analysis</h2>
                 <div class="row">
                     <div class="col-md-6">
                         <h5 class="text-center mb-3">Input Image</h5>
-                        <div class="image-container">
+                        <div class="image-container d-flex flex-column justify-content-center align-items-center">
                             <img id="originalImage" src="" class="img-fluid" alt="Input">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <h5 class="text-center mb-3">Detected Damages</h5>
-                        <div class="image-container">
+                        <div class="image-container d-flex flex-column justify-content-center align-items-center">
                             <img id="processedImage" src="" class="img-fluid" alt="Detected">
                         </div>
                     </div>
@@ -273,7 +364,7 @@
 
             <!-- METRICS DASHBOARD -->
             <div class="section">
-                <h2 class="section-title">📊 Detection Metrics</h2>
+                <h2 class="section-title"><i class="bi bi-bar-chart-line"></i> Detection Metrics</h2>
                 <div class="row">
                     <div class="col-md-3">
                         <div class="metric-card border-start border-primary border-5">
@@ -289,7 +380,7 @@
                     </div>
                     <div class="col-md-3">
                         <div class="metric-card border-start border-warning border-5">
-                            <p class="text-muted">Est. Severity</p>
+                            <p class="text-muted">Severity Class</p>
                             <h2 class="text-warning" id="metricSeverity">Medium</h2>
                         </div>
                     </div>
@@ -304,7 +395,7 @@
 
             <!-- DAMAGE BREAKDOWN TABLE -->
             <div class="section">
-                <h2 class="section-title">🎯 Detected Damages Breakdown</h2>
+                <h2 class="section-title"><i class="bi bi-bullseye"></i> Detected Damages Breakdown</h2>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead>
@@ -325,28 +416,38 @@
 
             <!-- ASSESSMENT SUMMARY -->
             <div class="section">
-                <h2 class="section-title">📋 Damage Assessment Summary</h2>
+                <h2 class="section-title"><i class="bi bi-file-text"></i> Technical Assessment</h2>
                 
                 <div class="info-box" id="aiSummary">
                     <!-- Injected by JS -->
                 </div>
 
-                <h4 class="mt-4 mb-3">Severity Analysis</h4>
-                <ul class="inspection-list" id="severityList">
-                    <!-- Injected by JS -->
-                </ul>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h4 class="mb-3">Severity & Urgency Analysis</h4>
+                        <ul class="inspection-list" id="severityList">
+                            <!-- Injected by JS -->
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h4 class="mb-3">Repair Estimates</h4>
+                        <ul class="inspection-list" id="repairEstList">
+                            <!-- Injected by JS -->
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <!-- RECOMMENDED NEXT STEPS -->
             <div class="section">
-                <h2 class="section-title">✅ Recommended Next Steps</h2>
+                <h2 class="section-title"><i class="bi bi-check-circle"></i> Recommended Next Steps</h2>
                 
-                <h5 class="mt-4">Week 1-2: Immediate Actions</h5>
+                <h5 class="mt-4">Phase 1: Immediate Actions</h5>
                 <ul class="inspection-list" id="week1List">
                     <!-- Injected by JS -->
                 </ul>
 
-                <h5 class="mt-4">Week 2-3: Repair Process</h5>
+                <h5 class="mt-4">Phase 2: Repair Process</h5>
                 <ul class="inspection-list" id="week2List">
                     <!-- Injected by JS -->
                 </ul>
@@ -354,28 +455,28 @@
 
             <!-- CONTACT INFO -->
             <div class="section">
-                <h2 class="section-title">📞 Contact Information</h2>
+                <h2 class="section-title"><i class="bi bi-telephone"></i> Contact Information</h2>
                 <p>For further information or to schedule a physical inspection, please contact our claims department:</p>
                 <ul class="inspection-list">
-                    <li><strong>Phone:</strong> (555) 123-4567</li>
-                    <li><strong>Email:</strong> claims@autoassess-ai.com</li>
-                    <li><strong>Hours:</strong> Monday-Friday, 8:00 AM - 6:00 PM</li>
+                    <li><strong><i class="bi bi-phone"></i> Phone:</strong> (555) 123-4567</li>
+                    <li><strong><i class="bi bi-envelope"></i> Email:</strong> claims@autoassess-ai.com</li>
+                    <li><strong><i class="bi bi-clock"></i> Hours:</strong> Monday-Friday, 8:00 AM - 6:00 PM</li>
                 </ul>
             </div>
 
             <!-- DISCLAIMER -->
             <div class="info-box">
-                <strong>⚠️ Important Disclaimer:</strong><br>
+                <strong><i class="bi bi-exclamation-triangle"></i> Important Disclaimer:</strong><br>
                 This report is generated by AI computer vision analysis and should be used as a preliminary assessment tool. Final damage evaluation and repair cost estimation require professional in-person inspection by a certified automotive technician or insurance adjuster.
             </div>
 
             <!-- ACTION BUTTONS -->
             <div class="action-buttons">
                 <button class="btn btn-primary btn-lg" onclick="window.print()">
-                    🖨️ Print Report
+                    <i class="bi bi-printer"></i> Print / Save PDF
                 </button>
                 <button class="btn btn-secondary btn-lg" onclick="location.reload()">
-                    🔄 Analyze Another Vehicle
+                    <i class="bi bi-arrow-repeat"></i> Analyze Another Vehicle
                 </button>
             </div>
             
@@ -432,6 +533,7 @@
                     // Set Meta
                     document.getElementById('reportId').textContent = data.report_meta.id;
                     document.getElementById('footerReportId').textContent = data.report_meta.id;
+                    document.getElementById('printFooterId').textContent = data.report_meta.id; // Update print footer
                     document.getElementById('reportDate').textContent = data.report_meta.timestamp;
 
                     // --- METRICS ---
@@ -472,23 +574,34 @@
                     });
 
                     // --- JSON REPORT CONTENT ---
-                    // Expecting report to be a JSON object now, not markdown string
                     const r = data.report; 
                     
                     // 1. Summary
-                    document.getElementById('aiSummary').innerHTML = `<strong>🔍 AI Detection Summary:</strong><br>${r.summary}`;
+                    document.getElementById('aiSummary').innerHTML = `<strong><i class="bi bi-search"></i> Executive Summary:</strong><br>${r.summary}`;
                     
-                    // 2. Severity
+                    // 2. Severity & Urgency
                     document.getElementById('metricSeverity').textContent = r.severity_level || 'Medium';
                     const sevList = document.getElementById('severityList');
                     sevList.innerHTML = `
                         <li><strong>Overall Severity:</strong> ${r.severity_level}<br><small>${r.severity_reasoning}</small></li>
                         <li><strong>Repair Urgency:</strong> ${r.repair_urgency}<br><small>${r.urgency_details}</small></li>
-                        <li><strong>Estimated Cost Range:</strong> ${r.cost_range}<br><small>${r.cost_details}</small></li>
-                        <li><strong>Recommended Action:</strong> ${r.recommended_action}</li>
                     `;
                     
-                    // 3. Next Steps
+                    // 3. Repair Estimates (New Section)
+                    const repList = document.getElementById('repairEstList');
+                    // Format parts list as string
+                    const partsStr = (r.likely_parts_needed && r.likely_parts_needed.length > 0) 
+                        ? r.likely_parts_needed.join(", ") 
+                        : "No specific parts listed.";
+
+                    repList.innerHTML = `
+                        <li><strong>Est. Cost Range:</strong> ${r.cost_range}<br><small>${r.cost_details}</small></li>
+                        <li><strong>Est. Labor Hours:</strong> ${r.estimated_labor_hours || 'N/A'}</li>
+                        <li><strong>Likely Parts:</strong> ${partsStr}</li>
+                        <li><strong>Primary Rec:</strong> ${r.recommended_action}</li>
+                    `;
+
+                    // 4. Next Steps
                     const w1List = document.getElementById('week1List');
                     w1List.innerHTML = '';
                     r.immediate_actions.forEach(action => {

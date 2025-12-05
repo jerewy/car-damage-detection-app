@@ -38,6 +38,16 @@ def run_inference(image_path, output_path):
     annotated_frame = result.plot()
     cv2.imwrite(str(output_path), annotated_frame)
     
+    # Severity Mapping Logic
+    SEVERITY_MAP = {
+        "scratch": "Low",
+        "dent": "Medium",
+        "crack": "High",
+        "lamp_broken": "High",
+        "tire_flat": "High",
+        "glass_shatter": "Critical"
+    }
+
     # Extract detections for LLM and UI
     detections = []
     for box in result.boxes:
@@ -55,11 +65,18 @@ def run_inference(image_path, output_path):
         else:
             location = "Center"
 
+        # Determine Severity
+        severity = SEVERITY_MAP.get(class_name, "Medium")
+        
+        # Boost severity if confidence is very high for critical items
+        if severity == "Critical" and confidence > 0.8:
+            severity = "CRITICAL (Safety Risk)"
+
         detections.append({
             "class": class_name,
             "confidence": confidence,
             "location": location,
-            "severity": "Medium" 
+            "severity": severity 
         })
         
     return {
@@ -98,25 +115,28 @@ def generate_insurance_report(detection_data, make, model_name, year):
         }
 
     prompt = f"""
-    You are an expert car insurance adjuster using an AI Damage Assessment System.
+    Act as a Senior Automotive Claims Adjuster and Technical Appraiser. 
+    Analyze the following vehicle damage detection data provided by an automated computer vision system.
     
     Vehicle: {vehicle_info}
     Detected Damages: {det_str}
     
-    Generate a professional damage assessment report in valid JSON format ONLY. 
-    Do not include any markdown formatting like ```json ... ```.
+    Generate a formal, industry-standard damage assessment report in valid JSON format ONLY. 
+    Use professional terminology (e.g., 'refinish', 'R&I', 'structural integrity') and maintain an objective tone.
     
     The JSON must have these exact keys:
     {{
-        "summary": "Concise summary of findings (e.g., 'Our system identified 2 dents...')",
-        "severity_level": "Low, Medium, or High",
-        "severity_reasoning": "Brief explanation of severity",
-        "repair_urgency": "Non-urgent, Urgent, or Critical",
-        "urgency_details": "Why is it urgent? (e.g., 'Does not affect safety')",
-        "cost_range": "Estimated cost (e.g., '$300 - $800 USD')",
-        "cost_details": "Breakdown or method (e.g., 'Paintless Dent Removal')",
-        "recommended_action": "Main recommendation (e.g., 'Professional inspection')",
-        "immediate_actions": ["Action 1", "Action 2", "Action 3"],
+        "summary": "A formal executive summary of the visual inspection findings.",
+        "severity_level": "Low, Medium, High, or Total Loss",
+        "severity_reasoning": "Technical justification for the severity classification.",
+        "repair_urgency": "Routine, Urgent, or Safety Critical",
+        "urgency_details": "Explanation focusing on safety and drivability.",
+        "cost_range": "Estimated repair cost range (e.g., '$800 - $1,500 USD').",
+        "cost_details": "Breakdown of cost drivers (e.g., 'Includes body labor, paint supplies, and parts').",
+        "estimated_labor_hours": "Estimated labor time (e.g., '12-16 hours').",
+        "likely_parts_needed": ["List of parts likely requiring repair or replacement"],
+        "recommended_action": "Primary technical recommendation (e.g., 'Tear-down and blueprinting').",
+        "immediate_actions": ["Action 1", "Action 2"],
         "secondary_actions": ["Action 1", "Action 2"]
     }}
     """
@@ -143,6 +163,8 @@ def generate_insurance_report(detection_data, make, model_name, year):
             "urgency_details": "Contact support.",
             "cost_range": "Unknown",
             "cost_details": "Unknown",
+            "estimated_labor_hours": "Unknown",
+            "likely_parts_needed": [],
             "recommended_action": "Manual Inspection",
             "immediate_actions": ["Contact support"],
             "secondary_actions": []

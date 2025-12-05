@@ -76,14 +76,45 @@ The core of this project is in the `notebooks/main.ipynb` notebook.
     - Package the final model and its metadata into the `/models` directory.
     - _Note: The training process will take a significant amount of time._
 
-## Deployment: Running Inference
+## Deployment
 
-After you have run the `main.ipynb` notebook and the final model (`cardd_yolo11s_640_final.pt`) has been generated in the `/models` directory, you can use the `deploy.py` script to detect damages on your own images.
+### Web Application
 
-**Usage:**
+To run the full web application with a user interface:
+
+1.  **Ensure Model is Available**: Make sure the final trained model (`cardd_yolo11s_640_final.pt`) is present in the `/models` directory. This is generated after running the `notebooks/main.ipynb` notebook.
+2.  **Set Up Groq API Key** (Optional but Recommended):
+    The application uses the Groq API for generating detailed insurance reports. For this feature to work, you need to provide your Groq API key. Create a `.env` file in the root directory of this project (e.g., `C:\dev\final_project_deep_learning\.env`) and add your API key like this:
+    ```env
+    GROQ_API_KEY=your_groq_api_key_here
+    ```
+    If you don't set this, the damage detection functionality will still work, but the detailed text report generation will not.
+3.  **Run the Application**:
+    Navigate to the project's root directory in your terminal and execute:
+    ```bash
+    uvicorn app.main:app --reload
+    ```
+    The `--reload` flag enables auto-reloading upon code changes, which is useful during development.
+4.  **Access the Web Interface**:
+    Open your web browser and go to `http://127.0.0.1:8000`.
+
+### CLI Inference Script
+
+After you have run the `main.ipynb` notebook and the final model (`cardd_yolo11s_640_final.pt`) has been generated in the `/models` directory, you can use the `deploy.py` script to detect damages on your own images or run a real-time webcam demo.
+
+**Usage for Image Inference:**
 
 ```bash
 python deploy.py --img-path "/path/to/your/image.jpg"
 ```
 
 The script will load the final model, run inference on the specified image, and save an annotated version of the image in a `deployment_output/` directory.
+
+**Usage for Real-time Webcam Demo:**
+
+To run a real-time demo using your webcam:
+
+```bash
+python deploy.py
+```
+    *Note: The script currently defaults to using your webcam (`VIDEO_SOURCE = 0`) as defined within `deploy.py`. Press 'Q' to quit the display window.*
