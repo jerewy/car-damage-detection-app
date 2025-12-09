@@ -1,11 +1,11 @@
-# Car Damage Detection with YOLOv8
+# Car Damage Detection with YOLOv11
 
-This project develops and evaluates a YOLOv8-based object detection model to identify various types of damage on vehicles. The entire workflow, from data preparation to model evaluation and packaging, is documented in the `notebooks/main.ipynb` notebook.
+This project develops and evaluates a YOLOv11-based object detection model to identify various types of damage on vehicles. The entire workflow, from data preparation to model evaluation and packaging, is documented in the `notebooks/main.ipynb` notebook.
 
 ## Project Structure
 
 - `/.gitignore`: Specifies files and directories to be ignored by Git.
-- `/cardd.yaml`: The dataset configuration file used by YOLOv8 for training.
+- `/cardd.yaml`: The dataset configuration file used by YOLOv11 for training.
 - `/deploy.py`: A Python script to run inference on new images using the final trained model.
 - `/requirements.txt`: A list of Python dependencies required for the project.
 - `/datasets/`: This directory is initially empty and will be populated with the CarDD dataset after running the notebook.
@@ -117,4 +117,5 @@ To run a real-time demo using your webcam:
 ```bash
 python deploy.py
 ```
+
     *Note: The script currently defaults to using your webcam (`VIDEO_SOURCE = 0`) as defined within `deploy.py`. Press 'Q' to quit the display window.*
