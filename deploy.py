@@ -7,7 +7,7 @@ from ultralytics import YOLO
 # CONFIGURATION
 # ==========================================
 # 1. Load your PRODUCTION model (The one we just saved)
-MODEL_PATH = "models/cardd_yolo11s_640_final.pt"
+MODEL_PATH = "models/cardd_yolo11s_1024_final.pt"
 
 # 2. Input Source
 # Option A: Webcam (Best for live demo) -> Set to 0
@@ -60,9 +60,8 @@ while True:
         break # End of video
         
     # 1. Run Inference
-    # We force imgsz=640 (This is what makes Exp2 fast!)
     start = time.time()
-    results = model(frame, imgsz=640, conf=CONF_THRESHOLD, verbose=False)
+    results = model(frame, imgsz=1024, conf=CONF_THRESHOLD, verbose=False)
     
     # 2. Draw Bounding Boxes
     annotated_frame = results[0].plot()
@@ -74,7 +73,7 @@ while True:
     
     # 4. Draw FPS on Screen (Crucial for Thesis)
     # Green text with black outline for visibility
-    cv2.putText(annotated_frame, f"Model: Exp2 (640px)", (20, 40), 
+    cv2.putText(annotated_frame, f"Model: Exp4 (1024px)", (20, 40), 
                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
     cv2.putText(annotated_frame, f"FPS: {fps:.1f}", (20, 80), 
                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)

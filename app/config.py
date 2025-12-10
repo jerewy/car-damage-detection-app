@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-MODEL_PATH = BASE_DIR / "models" / "cardd_yolo11s_640_final.pt"
+MODEL_PATH = BASE_DIR / "models" / "cardd_yolo11s_1024_final.pt"
+MODEL_IMAGE_SIZE = 1024
 UPLOAD_DIR = BASE_DIR / "app" / "static" / "uploads"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 

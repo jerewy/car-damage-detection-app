@@ -1,6 +1,6 @@
 from ultralytics import YOLO
 from groq import Groq
-from .config import MODEL_PATH, GROQ_API_KEY
+from .config import MODEL_PATH, MODEL_IMAGE_SIZE, GROQ_API_KEY
 import cv2
 import json
 import logging
@@ -27,7 +27,7 @@ def run_inference(image_path, output_path):
     start_time = time.time()
     
     # Run inference
-    results = model(image_path, imgsz=640, conf=0.4)
+    results = model(image_path, imgsz=MODEL_IMAGE_SIZE, conf=0.4)
     
     end_time = time.time()
     processing_time_ms = (end_time - start_time) * 1000
@@ -83,7 +83,7 @@ def run_inference(image_path, output_path):
         "detections": detections,
         "processing_time": round(processing_time_ms, 2),
         "count": len(detections),
-        "model_info": "YOLO11s"
+        "model_info": f"YOLO11s ({MODEL_IMAGE_SIZE})"
     }
 
 def generate_insurance_report(detection_data, make, model_name, year):
