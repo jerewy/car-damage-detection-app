@@ -6,11 +6,11 @@ import json
 import logging
 import time
 
-# Configure logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load model once
+
 logger.info(f"Loading model from {MODEL_PATH}")
 try:
     model = YOLO(MODEL_PATH)
@@ -19,14 +19,7 @@ except Exception as e:
     raise
 
 def run_inference(image_path, output_path):
-    """
-    Runs YOLO inference on the image.
-    Saves the annotated image to output_path.
-    Returns a dictionary with detections and metadata.
-    """
     start_time = time.time()
-    
-    # Run inference
     results = model(image_path, imgsz=MODEL_IMAGE_SIZE, conf=0.4)
     
     end_time = time.time()
@@ -34,11 +27,9 @@ def run_inference(image_path, output_path):
     
     result = results[0]
     
-    # Save annotated image
     annotated_frame = result.plot()
     cv2.imwrite(str(output_path), annotated_frame)
     
-    # Severity Mapping Logic
     SEVERITY_MAP = {
         "scratch": "Low",
         "dent": "Medium",
@@ -48,14 +39,14 @@ def run_inference(image_path, output_path):
         "glass_shatter": "Critical"
     }
 
-    # Extract detections for LLM and UI
+
     detections = []
     for box in result.boxes:
         cls_id = int(box.cls[0])
         class_name = result.names[cls_id]
         confidence = float(box.conf[0])
         
-        # Simple location logic based on box center
+
         x_center = box.xywh[0][0]
         img_width = result.orig_shape[1]
         if x_center < img_width / 3:
@@ -65,10 +56,8 @@ def run_inference(image_path, output_path):
         else:
             location = "Center"
 
-        # Determine Severity
         severity = SEVERITY_MAP.get(class_name, "Medium")
-        
-        # Boost severity if confidence is very high for critical items
+
         if severity == "Critical" and confidence > 0.8:
             severity = "CRITICAL (Safety Risk)"
 
@@ -87,9 +76,6 @@ def run_inference(image_path, output_path):
     }
 
 def generate_insurance_report(detection_data, make, model_name, year):
-    """
-    Generates a structured JSON report using Groq API based on detections.
-    """
     if not GROQ_API_KEY:
         return {"error": "Groq API Key not configured"}
         
@@ -99,7 +85,6 @@ def generate_insurance_report(detection_data, make, model_name, year):
     detections = detection_data.get("detections", [])
     det_str = json.dumps(detections, indent=2)
     
-    # Fallback if no detections
     if not detections:
         return {
             "summary": f"No specific damage patterns were detected by the automated system on the {vehicle_info}.",
@@ -150,7 +135,7 @@ def generate_insurance_report(detection_data, make, model_name, year):
                 }
             ],
             model="llama-3.3-70b-versatile",
-            response_format={"type": "json_object"} # Enforce JSON mode
+            response_format={"type": "json_object"}
         )
         return json.loads(chat_completion.choices[0].message.content)
     except Exception as e:

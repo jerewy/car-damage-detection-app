@@ -173,7 +173,6 @@
             margin-top: 40px;
         }
         
-        /* Print optimization */
         @media print {
             body { 
                 background: white !important; 
@@ -190,7 +189,7 @@
                 box-shadow: none !important;
                 border: 1px solid #ccc !important;
                 margin-bottom: 20px !important;
-                break-inside: avoid; /* Prevent cutting sections in half */
+                break-inside: avoid; 
                 page-break-inside: avoid;
             }
             .metric-card {
@@ -207,27 +206,27 @@
                 padding-bottom: 10px;
                 margin-bottom: 20px;
             }
-            /* Remove Bootstrap colors for print fidelity */
+
             .text-primary, .text-success, .text-warning, .text-info {
                 color: black !important;
             }
-            /* Fix links */
+
             a { 
                 text-decoration: none !important; 
                 color: black !important; 
             }
-            /* Ensure images fit and don't break */
+
             img {
                 max-width: 100% !important;
                 page-break-inside: avoid;
             }
-            /* Table readability */
+
             .table th {
                 background-color: #f0f0f0 !important;
                 color: black !important;
             }
             
-            /* Print specific row/column handling for images */
+
             .row {
                 display: flex !important;
                 flex-wrap: nowrap !important;
@@ -237,7 +236,7 @@
                 flex: 0 0 50% !important;
             }
             
-            /* Fixed Print Footer */
+
             .print-footer {
                 display: block !important;
                 position: fixed;
@@ -251,26 +250,25 @@
                 background: white;
             }
             
-            /* FORCE BACKGROUND COLORS IN PRINT */
+
             .progress, .progress-bar, .badge {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 color-adjust: exact !important;
             }
 
-            /* Add padding to body so footer doesn't cover content */
+
             body {
                 padding-bottom: 50px;
             }
         }
         
         .print-footer {
-            display: none; /* Hidden on screen */
+            display: none; 
         }
     </style>
 </head>
 <body>
-    <!-- PRINT FOOTER (Visible only in PDF/Print) -->
     <div class="print-footer">
         <div class="d-flex justify-content-between">
             <span><strong>CONFIDENTIAL INSURANCE DOCUMENT</strong></span>
@@ -281,14 +279,12 @@
     </div>
 
     <div class="container">
-        <!-- HEADER -->
         <div class="header">
             <h1>Car Damage Assessment Report</h1>
             <p>AI-Powered Visual Inspection & Insurance Reporting</p>
             <p><small>Powered by AutoAssess-AI - YOLO11s (1024) - Inference tuned for clarity</small></p>
         </div>
 
-        <!-- UPLOAD FORM -->
         <div id="uploadSection" class="section">
             <h2 class="section-title"><i class="bi bi-cloud-upload"></i> Upload Vehicle Image</h2>
             <p class="text-muted mb-3" style="font-size: 0.95rem;">Add a clear exterior photo (JPEG/PNG). We keep uploads local for this session.</p>
@@ -324,7 +320,6 @@
 
         <div id="results" style="display: none;">
 
-            <!-- REPORT METADATA -->
             <div class="report-meta">
                 <div>
                     <strong>Report ID:</strong> <code id="reportId">DA-2025...</code>
@@ -337,7 +332,6 @@
                 </div>
             </div>
 
-            <!-- VEHICLE INFO -->
             <div class="section">
                 <h2 class="section-title"><i class="bi bi-car-front"></i> Vehicle Information</h2>
                 <div class="row">
@@ -353,7 +347,6 @@
                 </div>
             </div>
 
-            <!-- DETECTION IMAGES -->
             <div class="section">
                 <h2 class="section-title"><i class="bi bi-camera"></i> Visual Analysis</h2>
                 <div class="row">
@@ -372,7 +365,6 @@
                 </div>
             </div>
 
-            <!-- METRICS DASHBOARD -->
             <div class="section">
                 <h2 class="section-title"><i class="bi bi-bar-chart-line"></i> Detection Metrics</h2>
                 <div class="row">
@@ -403,7 +395,7 @@
                 </div>
             </div>
 
-            <!-- DAMAGE BREAKDOWN TABLE -->
+ 
             <div class="section">
                 <h2 class="section-title"><i class="bi bi-bullseye"></i> Detected Damages Breakdown</h2>
                 <div class="table-responsive">
@@ -418,52 +410,49 @@
                             </tr>
                         </thead>
                         <tbody id="detectionTableBody">
-                            <!-- Injected by JS -->
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- ASSESSMENT SUMMARY -->
+
             <div class="section">
                 <h2 class="section-title"><i class="bi bi-file-text"></i> Technical Assessment</h2>
                 
                 <div class="info-box" id="aiSummary">
-                    <!-- Injected by JS -->
                 </div>
 
                 <div class="row mt-4">
                     <div class="col-md-6">
                         <h4 class="mb-3">Severity & Urgency Analysis</h4>
                         <ul class="inspection-list" id="severityList">
-                            <!-- Injected by JS -->
+    
                         </ul>
                     </div>
                     <div class="col-md-6">
                         <h4 class="mb-3">Repair Estimates</h4>
                         <ul class="inspection-list" id="repairEstList">
-                            <!-- Injected by JS -->
+    
                         </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- RECOMMENDED NEXT STEPS -->
+
             <div class="section">
                 <h2 class="section-title"><i class="bi bi-check-circle"></i> Recommended Next Steps</h2>
                 
                 <h5 class="mt-4">Phase 1: Immediate Actions</h5>
                 <ul class="inspection-list" id="week1List">
-                    <!-- Injected by JS -->
+ 
                 </ul>
 
                 <h5 class="mt-4">Phase 2: Repair Process</h5>
                 <ul class="inspection-list" id="week2List">
-                    <!-- Injected by JS -->
+
                 </ul>
             </div>
 
-            <!-- CONTACT INFO -->
             <div class="section">
                 <h2 class="section-title"><i class="bi bi-telephone"></i> Contact Information</h2>
                 <p>For further information or to schedule a physical inspection, please contact our claims department:</p>
@@ -474,13 +463,13 @@
                 </ul>
             </div>
 
-            <!-- DISCLAIMER -->
+
             <div class="info-box">
                 <strong><i class="bi bi-exclamation-triangle"></i> Important Disclaimer:</strong><br>
                 This AI report is a preliminary indicator only. Confirm findings with a certified technician or adjuster before decisions.
             </div>
 
-            <!-- ACTION BUTTONS -->
+
             <div class="action-buttons">
                 <button class="btn btn-primary btn-lg" onclick="window.print()">
                     <i class="bi bi-printer"></i> Print / Save PDF
@@ -490,7 +479,7 @@
                 </button>
             </div>
             
-            <!-- FOOTER -->
+
             <div class="text-center mt-5 text-muted">
                 <small>
                     Generated by AutoAssess-AI | YOLO11s Detection System<br>
@@ -518,7 +507,6 @@
             formData.append('model', md);
             formData.append('year', yr);
 
-            // UI Updates
             document.getElementById('uploadSection').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
             
@@ -531,22 +519,18 @@
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    // Set Vehicle Info
                     document.getElementById('resMake').textContent = mk;
                     document.getElementById('resModel').textContent = md;
                     document.getElementById('resYear').textContent = yr;
                     
-                    // Set Images
                     document.getElementById('originalImage').src = data.original_image;
                     document.getElementById('processedImage').src = data.processed_image;
                     
-                    // Set Meta
                     document.getElementById('reportId').textContent = data.report_meta.id;
                     document.getElementById('footerReportId').textContent = data.report_meta.id;
                     document.getElementById('printFooterId').textContent = data.report_meta.id; // Update print footer
                     document.getElementById('reportDate').textContent = data.report_meta.timestamp;
 
-                    // --- METRICS ---
                     const inf = data.inference_data;
                     document.getElementById('metricCount').textContent = inf.count;
                     document.getElementById('metricTime').textContent = inf.processing_time + 'ms';
@@ -560,7 +544,6 @@
                         document.getElementById('metricConf').textContent = '0%';
                     }
                     
-                    // Fill Table
                     const tbody = document.getElementById('detectionTableBody');
                     tbody.innerHTML = '';
                     inf.detections.forEach((d, index) => {
@@ -590,13 +573,11 @@
                         tbody.insertAdjacentHTML('beforeend', row);
                     });
 
-                    // --- JSON REPORT CONTENT ---
+
                     const r = data.report; 
                     
-                    // 1. Summary
                     document.getElementById('aiSummary').innerHTML = `<strong><i class="bi bi-search"></i> Executive Summary:</strong><br>${r.summary}`;
                     
-                    // 2. Severity & Urgency
                     document.getElementById('metricSeverity').textContent = r.severity_level || 'Medium';
                     const sevList = document.getElementById('severityList');
                     sevList.innerHTML = `
@@ -604,9 +585,7 @@
                         <li><strong>Repair Urgency:</strong> ${r.repair_urgency}<br><small>${r.urgency_details}</small></li>
                     `;
                     
-                    // 3. Repair Estimates (New Section)
                     const repList = document.getElementById('repairEstList');
-                    // Format parts list as string
                     const partsStr = (r.likely_parts_needed && r.likely_parts_needed.length > 0) 
                         ? r.likely_parts_needed.join(", ") 
                         : "No specific parts listed.";
@@ -618,7 +597,6 @@
                         <li><strong>Primary Rec:</strong> ${r.recommended_action}</li>
                     `;
 
-                    // 4. Next Steps
                     const w1List = document.getElementById('week1List');
                     w1List.innerHTML = '';
                     r.immediate_actions.forEach(action => {

@@ -10,7 +10,6 @@ MODEL_IMAGE_SIZE = 1024
 UPLOAD_DIR = BASE_DIR / "app" / "static" / "uploads"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-# Ensure upload directory exists
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 if not GROQ_API_KEY:

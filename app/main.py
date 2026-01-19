@@ -11,13 +11,13 @@ from datetime import datetime
 from .config import UPLOAD_DIR
 from .utils import run_inference, generate_insurance_report
 
-# Configure logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Car Damage Detection System")
 
-# Mount static files
+
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 templates = Jinja2Templates(directory="app/templates")
@@ -34,11 +34,9 @@ async def analyze_image(
     year: str = Form(...)
 ):
     try:
-        # Validate file type
         if not file.content_type.startswith("image/"):
             raise HTTPException(status_code=400, detail="File must be an image")
 
-        # Save uploaded file
         file_extension = Path(file.filename).suffix
         unique_filename = f"{uuid.uuid4()}{file_extension}"
         input_path = UPLOAD_DIR / unique_filename
@@ -49,15 +47,12 @@ async def analyze_image(
         with open(input_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
             
-        # Run Inference
         logger.info("Running inference...")
         inference_result = run_inference(str(input_path), str(output_path))
         
-        # Generate Report
         logger.info("Generating report...")
         report = generate_insurance_report(inference_result, make, model, year)
         
-        # Generate Report ID
         report_id = f"DA-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:4].upper()}"
         
         return JSONResponse({
